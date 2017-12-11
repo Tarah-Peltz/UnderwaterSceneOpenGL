@@ -1,0 +1,65 @@
+# Blender MTL File: 'RockSet.blend'
+# Material Count: 6
+
+newmtl Material.001
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.940391 0.940391 0.940391
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl Material.002
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.090164 0.090164 0.090164
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd RockTexture2.bmp
+map_Disp RockTexture2.bmp
+
+newmtl Material.003
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.057377 0.057377 0.057377
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd RockTexture1.bmp
+map_Disp RockTexture1.bmp
+
+newmtl Material.004
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.054217 0.054217 0.054217
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd white-marble-tile-texture-iplhec7p.bmp
+
+newmtl Material.005
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.066265 0.066265 0.066265
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Rock5.bmp
+map_Disp Rock5.bmp
+
+newmtl Material.006
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.054217 0.054217 0.054217
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Rock6.bmp
+map_Disp Rock6.bmp
