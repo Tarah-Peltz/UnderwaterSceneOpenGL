@@ -259,10 +259,10 @@ glEnd();*/
 
         }
         // close the loop back to zero degrees 
-    //  glTexCoord2f( 0.0, 0.0 );
-    //  glVertex3f(radius, 0, 0);
-    //  glTexCoord2f( 0.0, 1.0 );
-   //   glVertex3f(radius - .15, height, 0);
+      glTexCoord2f( 0.0, 0.0 );
+      glVertex3f(radius, 0, 0);
+      glTexCoord2f( 0.0, 1.0 );
+      glVertex3f(radius - .15, height, 0);
       normalV(radius * cos(i* 2 * PI), 0, radius * sin(i), (radius - .15) * cos(i* 2 * PI), height, (radius - .15) * sin(i* 2 * PI), oldX, height, oldZ);
       glNormal3f(normalX, normalY, normalZ);
       glEnd();
@@ -279,12 +279,14 @@ glEnd();*/
          glVertex3f((radius - .25) * cos(i* 2 * PI), height + .15, (radius - .25) * sin(i* 2 * PI));
          normalV(radius * cos(i* 2 * PI), height, radius * sin(i* 2 * PI), (radius - .15) * cos(i* 2 * PI), height + .15, (radius - .15) * sin(i* 2 * PI), oldX, height + .15, oldZ);
          glNormal3f(normalX, normalY, normalZ);
+         oldX = (radius - .25) * cos(i* 2 * PI); 
+         oldZ = (radius - .25) * sin(i* 2 * PI);
       }
         /* close the loop back to zero degrees */
-    //  glTexCoord2f( 0.0, 0.0 );
-    //  glVertex3f(radius - .15, height, 0);
-     // glTexCoord2f( 0.0, 1.0 );
-    //  glVertex3f(radius - .25, height + .15, 0);
+      /*glTexCoord2f( 0.0, 0.0 );
+      glVertex3f(radius - .15, height, 0);
+      glTexCoord2f( 0.0, 1.0 );
+      glVertex3f(radius - .25, height + .15, 0);*/
       normalV(radius * cos(i* 2 * PI), height, radius * sin(i* 2 * PI), (radius - .15) * cos(i* 2 * PI), height + .15, (radius - .15) * sin(i* 2 * PI), oldX, height + .15, oldZ);
       glNormal3f(normalX, normalY, normalZ);
       glEnable(GL_TEXTURE_2D);

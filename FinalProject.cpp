@@ -338,17 +338,10 @@ void seaweed() {
             seaweedPoints[x+1][1][2]  + Intensity * (cos( glutGet(GLUT_ELAPSED_TIME)/2.0 ) * (1.0 - y/44.0)) * 
             sin( seaweedPoints[x+1][y][2] + 2.0*random));*/
          //if (y > 10) {
-            glTexCoord2f(x/44.0, y/44.0); glVertex3f(seaweedPoints[x][y][0], seaweedPoints[x][y][1], seaweedPoints[x][y][2] * y/44 * (abs(x-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));//(seaweedPoints[x][y][1] / 44) / 100));
-            glTexCoord2f(x/44.0, (y+1)/44.0); glVertex3f(seaweedPoints[x][y+1][0], seaweedPoints[x][y+1][1], seaweedPoints[x][y+1][2] * (y+1)/44 * (abs(x-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));// (seaweedPoints[x][y+1][1] / 44) / 100));
-            glTexCoord2f((x+1)/44.0, (y+1)/44.0); glVertex3f(seaweedPoints[x+1][y+1][0], seaweedPoints[x+1][y+1][1], seaweedPoints[x+1][y+1][2] * (y+1)/44 * (abs(x+1-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));//(seaweedPoints[x+1][y+1][1] / 44) / 100));
-            glTexCoord2f((x+1)/44.0, (y)/44.0); glVertex3f(seaweedPoints[x+1][y][0], seaweedPoints[x+1][y][1], seaweedPoints[x+1][1][2] * y/44 * (abs(x+1-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));//(seaweedPoints[x+1][y][1] / 44) / 100));
-         //} 
-         //else {
-            /*glTexCoord2f(x/44.0, y/44.0); glVertex3f(seaweedPoints[x][y][0], seaweedPoints[x][y][1], seaweedPoints[x][y][2]);
-            glTexCoord2f(x/44.0, (y+1)/44.0); glVertex3f(seaweedPoints[x][y+1][0], seaweedPoints[x][y+1][1], seaweedPoints[x][y+1][2]);
-            glTexCoord2f((x+1)/44.0, (y+1)/44.0); glVertex3f(seaweedPoints[x+1][y+1][0], seaweedPoints[x+1][y+1][1], seaweedPoints[x+1][y+1][2]);
-            glTexCoord2f((x+1)/44.0, (y)/44.0); glVertex3f(seaweedPoints[x+1][y][0], seaweedPoints[x+1][y][1], seaweedPoints[x+1][1][2]);*/
-         //}     
+            glTexCoord2f(x/44.0, y/44.0); glVertex3f(seaweedPoints[x][y][0], seaweedPoints[x][y][1], seaweedPoints[x][y][2] * y/44 * (abs(x-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));
+            glTexCoord2f(x/44.0, (y+1)/44.0); glVertex3f(seaweedPoints[x][y+1][0], seaweedPoints[x][y+1][1], seaweedPoints[x][y+1][2] * (y+1)/44 * (abs(x-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));
+            glTexCoord2f((x+1)/44.0, (y+1)/44.0); glVertex3f(seaweedPoints[x+1][y+1][0], seaweedPoints[x+1][y+1][1], seaweedPoints[x+1][y+1][2] * (y+1)/44 * (abs(x+1-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));
+            glTexCoord2f((x+1)/44.0, (y)/44.0); glVertex3f(seaweedPoints[x+1][y][0], seaweedPoints[x+1][y][1], seaweedPoints[x+1][1][2] * y/44 * (abs(x+1-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));
       }
    }
    
