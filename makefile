@@ -49,7 +49,7 @@ BasicShapes.a:BasicShapes.o
 
 #  Link
 FinalProject:FinalProject.o CSCIx229.a BasicShapes.a
-	g++ -O3 -o $@ $^   $(LIBS)
+	g++ -O1 -o $@ $^   $(LIBS)
 
 #  Clean
 clean:

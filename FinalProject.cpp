@@ -67,6 +67,7 @@ float causticCounter = 0;
 
 float coralPoints[ 45 ][ 45 ][3];//The Array For The Points On The Grid Of Our "Wave"
 float seaweedPoints[ 45 ][ 45 ][3];//The Array For The Points On The Grid Of Our "Wave"
+float seaweedPoints2[ 45 ][ 45 ][3];//The Array For The Points On The Grid Of Our "Wave"
 float hold;//Temporarily Holds A Floating Point Value
 
 int nbFrames = 0;
@@ -121,8 +122,8 @@ static void Sky(double D, int pass)
    glBegin(GL_QUADS);
    glTexCoord2f(0,0); glVertex3f(-D,0,-D);
    glTexCoord2f(1,0); glVertex3f(+D,0,-D);
-   glTexCoord2f(1,1); glVertex3f(+D,+D,-D);
-   glTexCoord2f(0,1); glVertex3f(-D,+D,-D);
+   glTexCoord2f(1,1); glVertex3f(+2.*D,+D,-2.*D);
+   glTexCoord2f(0,1); glVertex3f(-2.*D,+D,-2.*D);
    glEnd();
 
    if (causticsPass == 0){
@@ -131,8 +132,8 @@ static void Sky(double D, int pass)
    glBegin(GL_QUADS);
    glTexCoord2f(0,0); glVertex3f(+D,0,-D);
    glTexCoord2f(1,0); glVertex3f(+D,0,+D);
-   glTexCoord2f(1,1); glVertex3f(+D,+D,+D);
-   glTexCoord2f(0,1); glVertex3f(+D,+D,-D);
+   glTexCoord2f(1,1); glVertex3f(+2.*D,+D,+2.*D);
+   glTexCoord2f(0,1); glVertex3f(+2.*D,+D,-2.*D);
    glEnd();
 
    if (causticsPass == 0){
@@ -141,8 +142,8 @@ static void Sky(double D, int pass)
    glBegin(GL_QUADS);
    glTexCoord2f(0,0); glVertex3f(+D,0,+D);
    glTexCoord2f(1,0); glVertex3f(-D,0,+D);
-   glTexCoord2f(1,1); glVertex3f(-D,+D,+D);
-   glTexCoord2f(0,1); glVertex3f(+D,+D,+D);
+   glTexCoord2f(1,1); glVertex3f(-2.*D,+D,+2.*D);
+   glTexCoord2f(0,1); glVertex3f(+2.*D,+D,+2.*D);
    glEnd();
 
    if (causticsPass == 0){
@@ -151,18 +152,18 @@ static void Sky(double D, int pass)
    glBegin(GL_QUADS);
    glTexCoord2f(0,0); glVertex3f(-D,0,+D);
    glTexCoord2f(1,0); glVertex3f(-D,0,-D);
-   glTexCoord2f(1,1); glVertex3f(-D,+D,-D);
-   glTexCoord2f(0,1); glVertex3f(-D,+D,+D);
+   glTexCoord2f(1,1); glVertex3f(-2.*D,+D,-2.*D);
+   glTexCoord2f(0,1); glVertex3f(-2.*D,+D,+2.*D);
    glEnd();
 
    //  Top and bottom
    if (causticsPass == 0) {
       glBindTexture(GL_TEXTURE_2D,sky[4]);
       glBegin(GL_QUADS);
-      glTexCoord2f(1,1); glVertex3f(+D,+D,-D);
-      glTexCoord2f(1,0); glVertex3f(+D,+D,+D);
-      glTexCoord2f(0,0); glVertex3f(-D,+D,+D);
-      glTexCoord2f(0,1); glVertex3f(-D,+D,-D);
+      glTexCoord2f(1,1); glVertex3f(+2.*D,+D,-2.*D);
+      glTexCoord2f(1,0); glVertex3f(+2.*D,+D,+2.*D);
+      glTexCoord2f(0,0); glVertex3f(-2.*D,+D,+2.*D);
+      glTexCoord2f(0,1); glVertex3f(-2.*D,+D,-2.*D);
       glEnd();
    }
 
@@ -293,9 +294,13 @@ void seaweedInit() {
          seaweedPoints[x][y][1]= (y/5.0f)-1.0f;
          seaweedPoints[x][y][2]= sin((((x/5.0f)*40.0f)/360.0f)*3.141592654);
 
-         coralPoints[x][y][0]= (x/8.0f)-6.5f;
+         seaweedPoints2[x][y][0]= sin((((x/5.0f)*40.0f)/360.0f)*3.141592654 + 4.5);
+         seaweedPoints2[x][y][1]= (y/5.0f)-1.0f;
+         seaweedPoints2[x][y][2]= (x/5.0f);
+
+         coralPoints[x][y][0]= sin((((x/8.0f)*40.0f)/360.0f)*3.141592654);
          coralPoints[x][y][1]= (y/8.0f)-1.0f;
-         coralPoints[x][y][2]= sin((((x/8.0f)*40.0f)/360.0f)*3.141592654);
+         coralPoints[x][y][2]= (x/8.0f)-6.5f;
       }
    }
 }
@@ -307,7 +312,25 @@ void seaweed() {
    glDepthMask(GL_FALSE);
    glEnable(GL_BLEND);
    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+   
 
+   glPushMatrix();
+   glBindTexture(GL_TEXTURE_2D,texture[0]);
+   glBegin(GL_QUADS);
+   for (int x = 0; x < 44; x++) {
+      for (int y = 0; y < 44; y++) {
+         
+         glTexCoord2f(x/44.0, y/44.0); glVertex3f(coralPoints[x][y][0], coralPoints[x][y][1], coralPoints[x][y][2]);
+         glTexCoord2f(x/44.0, (y+1)/44.0); glVertex3f(coralPoints[x][y+1][0], coralPoints[x][y+1][1], coralPoints[x][y+1][2]);
+         glTexCoord2f((x+1)/44.0, (y+1)/44.0); glVertex3f(coralPoints[x+1][y+1][0], coralPoints[x+1][y+1][1], coralPoints[x+1][y+1][2]);
+         glTexCoord2f((x+1)/44.0, (y)/44.0); glVertex3f(coralPoints[x+1][y][0], coralPoints[x+1][y][1], coralPoints[x+1][1][2]);
+      }
+   }
+   
+   glEnd();
+   glPopMatrix();
+
+   glPushMatrix();
    glBindTexture(GL_TEXTURE_2D,texture[11]);
    glBegin(GL_QUADS);
    for (int x = 0; x < 44; x++) {
@@ -323,18 +346,21 @@ void seaweed() {
    glPopMatrix();
 
    glPushMatrix();
-   glBindTexture(GL_TEXTURE_2D,texture[0]);
+   glRotatef(15, 0, 1, 0);
+   glBindTexture(GL_TEXTURE_2D,texture[11]);
    glBegin(GL_QUADS);
    for (int x = 0; x < 44; x++) {
       for (int y = 0; y < 44; y++) {
-         
-         glTexCoord2f(x/44.0, y/44.0); glVertex3f(coralPoints[x][y][0], coralPoints[x][y][1], coralPoints[x][y][2]);
-         glTexCoord2f(x/44.0, (y+1)/44.0); glVertex3f(coralPoints[x][y+1][0], coralPoints[x][y+1][1], coralPoints[x][y+1][2]);
-         glTexCoord2f((x+1)/44.0, (y+1)/44.0); glVertex3f(coralPoints[x+1][y+1][0], coralPoints[x+1][y+1][1], coralPoints[x+1][y+1][2]);
-         glTexCoord2f((x+1)/44.0, (y)/44.0); glVertex3f(coralPoints[x+1][y][0], coralPoints[x+1][y][1], coralPoints[x+1][1][2]);
+         glTexCoord2f(x/44.0, y/44.0); glVertex3f(seaweedPoints[x][y][0] + .01, seaweedPoints[x][y][1], seaweedPoints[x][y][2] * y/44 * (abs(x-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));
+         glTexCoord2f(x/44.0, (y+1)/44.0); glVertex3f(seaweedPoints[x][y+1][0] + .01, seaweedPoints[x][y+1][1], seaweedPoints[x][y+1][2] * (y+1)/44 * (abs(x-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));
+         glTexCoord2f((x+1)/44.0, (y+1)/44.0); glVertex3f(seaweedPoints[x+1][y+1][0] + .01, seaweedPoints[x+1][y+1][1], seaweedPoints[x+1][y+1][2] * (y+1)/44 * (abs(x+1-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));
+         glTexCoord2f((x+1)/44.0, (y)/44.0); glVertex3f(seaweedPoints[x+1][y][0] + .01, seaweedPoints[x+1][y][1], seaweedPoints[x+1][1][2] * y/44 * (abs(x+1-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));
       }
    }
+   
    glEnd();
+   glPopMatrix();
+
    glDisable(GL_TEXTURE_2D);
    glDisable(GL_BLEND);
    glDepthMask(GL_TRUE);
@@ -594,9 +620,10 @@ void display()
    glCallList(objFiles[0]);
    glPopMatrix();
    
+
    //Draw Fish (not in passes because I can't control material on it)
    glPushMatrix();
-   glTranslated(3, 3, 0);
+   glTranslatef(3, 3+.05*sin(glutGet(GLUT_ELAPSED_TIME)* 3.14159265359f/1000), 0);
    glScaled(.01, .01, .02);
    glCallList(objFiles[1]);
    glPopMatrix();
@@ -795,9 +822,9 @@ void idle()
    //Decay the speed
    //Speed decay inspired by: https://forums.ogre3d.org/viewtopic.php?t=18566
    //I believe this should remain constant independent of framerate/frametime
-   velocityX *=  pow(.99, frameTime/15);
-   velocityY *=  pow(.99, frameTime/15);
-   velocityZ *=  pow(.99, frameTime/15);
+   velocityX *=  pow(.97, frameTime/15);
+   velocityY *=  pow(.97, frameTime/15);
+   velocityZ *=  pow(.97, frameTime/15);
    glutPostRedisplay();
 }
 
