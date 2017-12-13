@@ -77,13 +77,6 @@ unsigned int LoadTexBMP(const char* file)
    //  Seek to and read image
    if (fseek(f,off,SEEK_SET) || fread(image,size,1,f)!=1) Fatal("Error reading data from image %s\n",file);
    fclose(f);
-   //  Reverse colors (BGR -> RGB)
-   /*for (k=0;k<size;k+=3)
-   {
-      unsigned char temp = image[k];
-      image[k]   = image[k+2];
-      image[k+2] = temp;
-   }*/
 
    size = 4*dx*dy;
    image2 = (unsigned char*) malloc(size);

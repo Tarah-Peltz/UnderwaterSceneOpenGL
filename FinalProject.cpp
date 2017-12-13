@@ -15,9 +15,7 @@ Referenced http://www.swiftless.com/tutorials/opengl/camera2.html heavily for fi
 #include <GL/glut.h>
 #endif
 #include "CSCIx229.h"
-#include "FishRender.h"
 #include "BasicShapes.h"
-#include "CrabRender.h"
 
 
 int mode=0;       //  Texture mode
@@ -71,6 +69,10 @@ float coralPoints[ 45 ][ 45 ][3];//The Array For The Points On The Grid Of Our "
 float seaweedPoints[ 45 ][ 45 ][3];//The Array For The Points On The Grid Of Our "Wave"
 float hold;//Temporarily Holds A Floating Point Value
 
+int nbFrames = 0;
+int lastPrint = 0;
+float frameTime = 0;
+
 typedef struct bubble {
    float xPosition;
    float yPosition;
@@ -119,8 +121,8 @@ static void Sky(double D, int pass)
    glBegin(GL_QUADS);
    glTexCoord2f(0,0); glVertex3f(-D,0,-D);
    glTexCoord2f(1,0); glVertex3f(+D,0,-D);
-   glTexCoord2f(1,1); glVertex3f(+D*5,+3*D,-D*5);
-   glTexCoord2f(0,1); glVertex3f(-D*5,+3*D,-D*5);
+   glTexCoord2f(1,1); glVertex3f(+D,+D,-D);
+   glTexCoord2f(0,1); glVertex3f(-D,+D,-D);
    glEnd();
 
    if (causticsPass == 0){
@@ -129,8 +131,8 @@ static void Sky(double D, int pass)
    glBegin(GL_QUADS);
    glTexCoord2f(0,0); glVertex3f(+D,0,-D);
    glTexCoord2f(1,0); glVertex3f(+D,0,+D);
-   glTexCoord2f(1,1); glVertex3f(+D*5,+3*D,+D*5);
-   glTexCoord2f(0,1); glVertex3f(+D*5,+3*D,-D*5);
+   glTexCoord2f(1,1); glVertex3f(+D,+D,+D);
+   glTexCoord2f(0,1); glVertex3f(+D,+D,-D);
    glEnd();
 
    if (causticsPass == 0){
@@ -139,8 +141,8 @@ static void Sky(double D, int pass)
    glBegin(GL_QUADS);
    glTexCoord2f(0,0); glVertex3f(+D,0,+D);
    glTexCoord2f(1,0); glVertex3f(-D,0,+D);
-   glTexCoord2f(1,1); glVertex3f(-D*5,+3*D,+D*5);
-   glTexCoord2f(0,1); glVertex3f(+D*5,+3*D,+D*5);
+   glTexCoord2f(1,1); glVertex3f(-D,+D,+D);
+   glTexCoord2f(0,1); glVertex3f(+D,+D,+D);
    glEnd();
 
    if (causticsPass == 0){
@@ -149,18 +151,18 @@ static void Sky(double D, int pass)
    glBegin(GL_QUADS);
    glTexCoord2f(0,0); glVertex3f(-D,0,+D);
    glTexCoord2f(1,0); glVertex3f(-D,0,-D);
-   glTexCoord2f(1,1); glVertex3f(-D*5,+3*D,-D*5);
-   glTexCoord2f(0,1); glVertex3f(-D*5,+3*D,+D*5);
+   glTexCoord2f(1,1); glVertex3f(-D,+D,-D);
+   glTexCoord2f(0,1); glVertex3f(-D,+D,+D);
    glEnd();
 
    //  Top and bottom
    if (causticsPass == 0) {
       glBindTexture(GL_TEXTURE_2D,sky[4]);
       glBegin(GL_QUADS);
-      glTexCoord2f(1,1); glVertex3f(+D*5,+3*D,-D*5);
-      glTexCoord2f(1,0); glVertex3f(+D*5,+3*D,+D*5);
-      glTexCoord2f(0,0); glVertex3f(-D*5,+3*D,+D*5);
-      glTexCoord2f(0,1); glVertex3f(-D*5,+3*D,-D*5);
+      glTexCoord2f(1,1); glVertex3f(+D,+D,-D);
+      glTexCoord2f(1,0); glVertex3f(+D,+D,+D);
+      glTexCoord2f(0,0); glVertex3f(-D,+D,+D);
+      glTexCoord2f(0,1); glVertex3f(-D,+D,-D);
       glEnd();
    }
 
@@ -288,120 +290,39 @@ void seaweedInit() {
    for (int x = 0; x < 45; x++) {
       for(int y = 0; y < 45; y++) {
          seaweedPoints[x][y][0]= (x/5.0f)+4.5f;
-         seaweedPoints[x][y][1]= (y/5.0f)-.2f;
-         //seaweedPoints[x][y][2]= (x/5.0f)+4.5f;
+         seaweedPoints[x][y][1]= (y/5.0f)-1.0f;
          seaweedPoints[x][y][2]= sin((((x/5.0f)*40.0f)/360.0f)*3.141592654);
 
          coralPoints[x][y][0]= (x/8.0f)-6.5f;
-         coralPoints[x][y][1]= (y/8.0f)-.2f;
+         coralPoints[x][y][1]= (y/8.0f)-1.0f;
          coralPoints[x][y][2]= sin((((x/8.0f)*40.0f)/360.0f)*3.141592654);
       }
    }
 }
 
-//Flag Effect from here: http://nehe.gamedev.net/tutorial/flag_effect_(waving_texture)/16002/
+
 void seaweed() {
-      float Intensity = 2.0;
    glPushMatrix();
    glTexEnvf(GL_TEXTURE_2D,GL_TEXTURE_ENV_MODE,GL_MODULATE);
    glDepthMask(GL_FALSE);
    glEnable(GL_BLEND);
    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-   float random = 1.0;
 
    glBindTexture(GL_TEXTURE_2D,texture[11]);
    glBegin(GL_QUADS);
    for (int x = 0; x < 44; x++) {
       for (int y = 0; y < 44; y++) {
-         /*glTexCoord2f(x/44.0, y/44.0); 
-         glVertex3f(seaweedPoints[x][y][0] + Intensity * (cos( glutGet(GLUT_ELAPSED_TIME)/1.5 ) * (1.0 - y/44.0)) * 
-            sin(seaweedPoints[x][y][0]), 
-            seaweedPoints[x][y][1] + 0.25 * sin( 1.5*seaweedPoints[x][y][0] + 2.0*seaweedPoints[x][y][2] )* (1.0 - y/44.0), 
-            seaweedPoints[x][y][2] + Intensity * (cos( glutGet(GLUT_ELAPSED_TIME)/2.0 ) * (1.0 - y/44.0)) * 
-            sin( seaweedPoints[x][y][2] + 2.0*random));
-         glTexCoord2f(x/44.0, (y+1)/44.0); 
-         glVertex3f(seaweedPoints[x][y+1][0] + Intensity * (cos( glutGet(GLUT_ELAPSED_TIME)/1.5 ) * (1.0 - (y+1)/44.0)) * 
-            sin(seaweedPoints[x][y + 1][0]), 
-            seaweedPoints[x][y+1][1] + 0.25 * sin( 1.5*seaweedPoints[x][y+1][0] + 2.0*seaweedPoints[x][y+1][2] )* (1.0 - (y+1)/44.0), 
-            seaweedPoints[x][y+1][2]  + Intensity * (cos( glutGet(GLUT_ELAPSED_TIME)/2.0 ) * (1.0 - (y+1)/44.0) * 
-               sin( seaweedPoints[x][y+1][2] + 2.0*random)));
-         glTexCoord2f((x+1)/44.0, (y+1)/44.0); 
-         glVertex3f(seaweedPoints[x+1][y+1][0] + Intensity * (cos( glutGet(GLUT_ELAPSED_TIME)/1.5 ) * (1.0 - (y + 1)/44.0)) * 
-            sin(seaweedPoints[x + 1][y + 1][0]), 
-            seaweedPoints[x+1][y+1][1] + 0.25 * sin( 1.5*seaweedPoints[x+1][y+1][0] + 2.0*seaweedPoints[x+1][y+1][2] )* (1.0 - (y+1)/44.0), 
-            seaweedPoints[x+1][y+1][2]  + Intensity * (cos( glutGet(GLUT_ELAPSED_TIME)/2.0 ) * (1.0 - (y+1)/44.0)) * 
-            sin(seaweedPoints[x+1][y+1][2] + 2.0*random));
-         glTexCoord2f((x+1)/44.0, (y)/44.0); 
-         glVertex3f(seaweedPoints[x+1][y][0]+ Intensity * (cos( glutGet(GLUT_ELAPSED_TIME)/1.5 ) * (1.0 - y/44.0)) * 
-            sin(seaweedPoints[x+1][y][0]), 
-            seaweedPoints[x+1][y][1] + 0.25 * sin( 1.5*seaweedPoints[x+1][y][0] + 2.0*seaweedPoints[x+1][y][2] )* (1.0 - y/44.0), 
-            seaweedPoints[x+1][1][2]  + Intensity * (cos( glutGet(GLUT_ELAPSED_TIME)/2.0 ) * (1.0 - y/44.0)) * 
-            sin( seaweedPoints[x+1][y][2] + 2.0*random));*/
-         //if (y > 10) {
-            glTexCoord2f(x/44.0, y/44.0); glVertex3f(seaweedPoints[x][y][0], seaweedPoints[x][y][1], seaweedPoints[x][y][2] * y/44 * (abs(x-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));
-            glTexCoord2f(x/44.0, (y+1)/44.0); glVertex3f(seaweedPoints[x][y+1][0], seaweedPoints[x][y+1][1], seaweedPoints[x][y+1][2] * (y+1)/44 * (abs(x-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));
-            glTexCoord2f((x+1)/44.0, (y+1)/44.0); glVertex3f(seaweedPoints[x+1][y+1][0], seaweedPoints[x+1][y+1][1], seaweedPoints[x+1][y+1][2] * (y+1)/44 * (abs(x+1-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));
-            glTexCoord2f((x+1)/44.0, (y)/44.0); glVertex3f(seaweedPoints[x+1][y][0], seaweedPoints[x+1][y][1], seaweedPoints[x+1][1][2] * y/44 * (abs(x+1-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));
+         glTexCoord2f(x/44.0, y/44.0); glVertex3f(seaweedPoints[x][y][0], seaweedPoints[x][y][1], seaweedPoints[x][y][2] * y/44 * (abs(x-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));
+         glTexCoord2f(x/44.0, (y+1)/44.0); glVertex3f(seaweedPoints[x][y+1][0], seaweedPoints[x][y+1][1], seaweedPoints[x][y+1][2] * (y+1)/44 * (abs(x-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));
+         glTexCoord2f((x+1)/44.0, (y+1)/44.0); glVertex3f(seaweedPoints[x+1][y+1][0], seaweedPoints[x+1][y+1][1], seaweedPoints[x+1][y+1][2] * (y+1)/44 * (abs(x+1-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));
+         glTexCoord2f((x+1)/44.0, (y)/44.0); glVertex3f(seaweedPoints[x+1][y][0], seaweedPoints[x+1][y][1], seaweedPoints[x+1][1][2] * y/44 * (abs(x+1-22) + 10)/30 * sin((((int)glutGet(GLUT_ELAPSED_TIME) * 2 * 3.14159 / 4000))));
       }
    }
    
    glEnd();
-
-   glBindTexture(GL_TEXTURE_2D,texture[0]);
-   glBegin(GL_QUADS);
-   for (int x = 0; x < 44; x++) {
-      for (int y = 0; y < 44; y++) {
-         
-         glTexCoord2f(x/44.0, y/44.0); glVertex3f(coralPoints[x][y][0], coralPoints[x][y][1], coralPoints[x][y][2]);
-         glTexCoord2f(x/44.0, (y+1)/44.0); glVertex3f(coralPoints[x][y+1][0], coralPoints[x][y+1][1], coralPoints[x][y+1][2]);
-         glTexCoord2f((x+1)/44.0, (y+1)/44.0); glVertex3f(coralPoints[x+1][y+1][0], coralPoints[x+1][y+1][1], coralPoints[x+1][y+1][2]);
-         glTexCoord2f((x+1)/44.0, (y)/44.0); glVertex3f(coralPoints[x+1][y][0], coralPoints[x+1][y][1], coralPoints[x+1][1][2]);
-      }
-   }
-   glEnd();
-   glDisable(GL_TEXTURE_2D);
-   glDisable(GL_BLEND);
-   glDepthMask(GL_TRUE);
-
    glPopMatrix();
-}
-
-/*void seaweedInit() {
-   for (int x = 0; x < 45; x++) {
-      for(int y = 0; y < 45; y++) {
-         seaweedPoints[x][y][0]= (x/5.0f)+4.5f;
-         seaweedPoints[x][y][1]= (y/5.0f)-.2f;
-         seaweedPoints[x][y][2]= sin((((x/5.0f)*40.0f)/360.0f)*3.141592654);
-
-         coralPoints[x][y][0]= (x/8.0f)-6.5f;
-         coralPoints[x][y][1]= (y/8.0f)-.2f;
-         coralPoints[x][y][2]= sin((((x/8.0f)*40.0f)/360.0f)*3.141592654);
-      }
-   }
-}
-
-//Flag Effect from here: http://nehe.gamedev.net/tutorial/flag_effect_(waving_texture)/16002/
-void seaweed() {
 
    glPushMatrix();
-   glTexEnvf(GL_TEXTURE_2D,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-   glDepthMask(GL_FALSE);
-   glEnable(GL_BLEND);
-   glBlendFunc(GL_ONE,GL_ONE_MINUS_SRC_ALPHA);
-   
-
-   glBindTexture(GL_TEXTURE_2D,texture[11]);
-   glBegin(GL_QUADS);
-   for (int x = 0; x < 44; x++) {
-      for (int y = 0; y < 44; y++) {
-         glTexCoord2f(x/44.0, y/44.0); glVertex3f(seaweedPoints[x][y][0], seaweedPoints[x][y][1], seaweedPoints[x][y][2]);
-         glTexCoord2f(x/44.0, (y+1)/44.0); glVertex3f(seaweedPoints[x][y+1][0], seaweedPoints[x][y+1][1], seaweedPoints[x][y+1][2]);
-         glTexCoord2f((x+1)/44.0, (y+1)/44.0); glVertex3f(seaweedPoints[x+1][y+1][0], seaweedPoints[x+1][y+1][1], seaweedPoints[x+1][y+1][2]);
-         glTexCoord2f((x+1)/44.0, (y)/44.0); glVertex3f(seaweedPoints[x+1][y][0], seaweedPoints[x+1][y][1], seaweedPoints[x+1][1][2]);
-      }
-   }
-   glEnd();
-
    glBindTexture(GL_TEXTURE_2D,texture[0]);
    glBegin(GL_QUADS);
    for (int x = 0; x < 44; x++) {
@@ -414,23 +335,12 @@ void seaweed() {
       }
    }
    glEnd();
-
-   int x, y = 0;
-   for(y = 0; y < 45; y++ )
-   {
-      hold=seaweedPoints[0][y][2];
-      for(x = 0; x < 44; x++)
-      {
-         seaweedPoints[x][y][2] = seaweedPoints[x+1][y][2];
-      }
-      seaweedPoints[44][y][2]=hold;
-   }
    glDisable(GL_TEXTURE_2D);
    glDisable(GL_BLEND);
    glDepthMask(GL_TRUE);
 
    glPopMatrix();
-}*/
+}
 
 void coralTubes(int texture) {
    glPushMatrix();
@@ -533,45 +443,15 @@ void firstPass() { //referenced for caustics: https://www.opengl.org/archives/re
    notShiny();
 
    glPushMatrix();
-   glTranslatef(5, 1, -2);
+   glTranslatef(5, .6, -2);
    oyster(texture[7], texture[8], texture[9]);
    glPopMatrix();
 
    Sky(worldDimensions, 0);
 
-   /*glPushMatrix();
-   glTranslatef(7, 6, -1);
-   glRotatef(40, 0, 1, 0);
-   glRotatef(10, 0, 0, 1);
-   glScalef(.5, .5, .5);
-   fish(texture[4], texture[1], texture[6], texture[5]);
-   glPopMatrix();
-
-   glPushMatrix();
-   glTranslatef(-8, 5, -1.5);
-   glRotatef(-90, 0, 1, 0);
-   glRotatef(-40, 0, 0, 1);
-   glScalef(.2, .2, .2);
-   fish(texture[4], texture[1], texture[6], texture[5]);
-   glPopMatrix();*/
-
    glPushMatrix();
    coralTubes(texture[12]);
    glPopMatrix();
-
-   /*glPushMatrix();
-   glTranslatef(1, 4, -.5);
-   glRotatef(-10, 0, 1, 0);
-   glScalef(.8, .8, .8);
-   crab(texture[3], texture[1]);
-   glPopMatrix();
-
-   glPushMatrix();
-   glTranslatef(-3.5, 1, 0);
-   glRotatef(-45, 0, 1, 0);
-   glScalef(.5, .5, .5);
-   crab(texture[3], texture[1]);
-   glPopMatrix();*/
 }
 
 
@@ -587,10 +467,7 @@ void secondPass() { //referenced for caustics: https://www.opengl.org/archives/r
    texture) with the previous color from the normal pass.  The
    caustics are modulated into the scene. */
    glEnable(GL_BLEND);
-   //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    glBlendFunc(GL_DST_COLOR, GL_ONE);
-//glBlendEquation(GL_MAX);
-
 
    /* The 0.03 in the Y column is just to shift the texture coordinates
    a little based on Y (depth in the water) so that vertical faces
@@ -632,43 +509,13 @@ void secondPass() { //referenced for caustics: https://www.opengl.org/archives/r
 
    glColor3f(1, 1, 1);
    glPushMatrix();
-   glTranslatef(5, 1, -2);
+   glTranslatef(5, .6, -2);
    oyster(caustics[causticIndex], caustics[causticIndex], caustics[causticIndex]);
    glPopMatrix();
-
-   /*glPushMatrix();
-   glTranslatef(7, 6, -1);
-   glRotatef(-40, 0, 1, 0);
-   glRotatef(10, 0, 0, 1);
-   glScalef(.5, .5, .5);
-   fish(caustics[causticIndex], caustics[causticIndex], caustics[causticIndex], caustics[causticIndex]);
-   glPopMatrix();
-
-   glPushMatrix();
-   glTranslatef(-8, 5, -1.5);
-   glRotatef(-90, 0, 1, 0);
-   glRotatef(-40, 0, 0, 1);
-   glScalef(.2, .2, .2);
-   fish(caustics[causticIndex], caustics[causticIndex], caustics[causticIndex], caustics[causticIndex]);
-   glPopMatrix();*/
 
    glPushMatrix();
    coralTubes(caustics[causticIndex]);
    glPopMatrix();
-
-   /*glPushMatrix();
-   glTranslatef(1, 4, -.5);
-   glRotatef(-10, 0, 1, 0);
-   glScalef(.8, .8, .8);
-   crab(caustics[causticIndex], caustics[causticIndex]);
-   glPopMatrix();
-
-   glPushMatrix();
-   glTranslatef(-3.5, 1, 0);
-   glRotatef(-45, 0, 1, 0);
-   glScalef(.5, .5, .5);
-   crab(caustics[causticIndex], caustics[causticIndex]);
-   glPopMatrix();*/
 
    glEnable(GL_LIGHTING);
    glDisable(GL_TEXTURE_GEN_S);
@@ -685,7 +532,6 @@ void secondPass() { //referenced for caustics: https://www.opengl.org/archives/r
  */
 void display()
 {
-   //ErrCheck("Start");
    posX += velocityX * t * 100000;
    posY += velocityY * t * 100000;
    posZ += velocityZ * t * 100000;
@@ -707,44 +553,31 @@ void display()
    //  Flat or smooth shading
    glShadeModel(smooth ? GL_SMOOTH : GL_FLAT);
 
-   //  Light switch
-   if (light)
-   {
-        //  Translate intensity to color vectors
-        float Ambient[]   = {0.01*ambient*20.0 ,0.01*ambient*20.0 ,0.01*ambient*20.0 ,1.0};
-        //  Light position
-        float Position[]  = {0,5,0,1.0};
-        //  OpenGL should normalize normal vectors
-        glEnable(GL_NORMALIZE);
-        //  Enable lighting
-        glEnable(GL_LIGHTING);
-        //  Location of viewer for specular calculations
-        glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,local);
-        //  glColor sets ambient and diffuse color materials
-        glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
-        glEnable(GL_COLOR_MATERIAL);
-        //  Enable light 0
-        glEnable(GL_LIGHT0);
-        //  Set ambient, diffuse, specular components and position of light 0
-        glLightfv(GL_LIGHT0,GL_AMBIENT ,Ambient);
-        glLightfv(GL_LIGHT0,GL_POSITION,Position);
-   }
-   else
-     glDisable(GL_LIGHTING);
+  //  Translate intensity to color vectors
+  float Ambient[]   = {0.01*ambient*10.0 ,0.01*ambient*10.0 ,0.01*ambient*10.0 ,1.0};
+  //  Light position
+  float Position[]  = {0,5,0,1.0};
+  //  OpenGL should normalize normal vectors
+  glEnable(GL_NORMALIZE);
+  //  Enable lighting
+  glEnable(GL_LIGHTING);
+  //  Location of viewer for specular calculations
+  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,local);
+  //  glColor sets ambient and diffuse color materials
+  glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+  glEnable(GL_COLOR_MATERIAL);
+  //  Enable light 0
+  glEnable(GL_LIGHT0);
+  //  Set ambient, diffuse, specular components and position of light 0
+  glLightfv(GL_LIGHT0,GL_AMBIENT ,Ambient);
+  glLightfv(GL_LIGHT0,GL_POSITION,Position);
 
-   glDisable(GL_LIGHTING); //Disable for print
+   //glDisable(GL_LIGHTING); //Disable for print
    glWindowPos2i(5,5);
    //  White
    glColor3f(1,1,1);
 
-   Print("Location=%f,%f,%f   ",posX, posY, posZ);
-
-    if (light)
-   {
-      glWindowPos2i(5,45);
-      glColor3f(1,1,1);
-   }
-        //Reference for fog: http://nehe.gamedev.net/tutorial/cool_looking_fog/19001/
+   //Reference for fog: http://nehe.gamedev.net/tutorial/cool_looking_fog/19001/
    glFogi(GL_FOG_MODE, GL_EXP2); // Fog Mode
    GLfloat fogColor[4]= {0.1f, 0.1f, .8f, .3f};
    glHint(GL_FOG, GL_NICEST);
@@ -753,19 +586,17 @@ void display()
    glHint(GL_FOG_HINT, GL_NICEST); // Fog Hint Value
    glFogf(GL_FOG_START, 3.0f); // Fog Start Depth
    glFogf(GL_FOG_END, 10.0f); // Fog End Depth
-
-//UNCOMMENT TO SEE FOG
-
    glEnable(GL_FOG); // Enables GL_FOG 
 
+   //Draw Crab (not in passes because I can't control material on it)
    glPushMatrix();
-   glTranslated(0, 1, 0);
-   //glScaled(.1, .1, .1);
+   glTranslated(0, 0, 0);
    glCallList(objFiles[0]);
    glPopMatrix();
    
+   //Draw Fish (not in passes because I can't control material on it)
    glPushMatrix();
-   glTranslated(3, 1, 0);
+   glTranslated(3, 3, 0);
    glScaled(.01, .01, .02);
    glCallList(objFiles[1]);
    glPopMatrix();
@@ -782,12 +613,10 @@ void display()
    glEnable(GL_BLEND);
 
    secondPass();
-
    /* Restore fragment operations to normal. */
    glDepthMask(GL_TRUE);
    glDepthFunc(GL_LESS);
    glDisable(GL_BLEND);
-
 
    seaweed();
    bubbles();
@@ -796,7 +625,6 @@ void display()
    glFlush();
    //  Make the rendered scene visible
    glutSwapBuffers();
-   //ErrCheck("End");
 }
 
 static void project()
@@ -939,10 +767,15 @@ void reshape(int width,int height)
 
 void idle()
 {
-   //Decay the speed
-   velocityX *= .9;
-   velocityY *= .9;
-   velocityZ *= .9;
+   //Frame Time code from: www.opengl-tutorial.org/miscellaneous/an-fps-counter/
+     nbFrames++;
+     if (glutGet(GLUT_ELAPSED_TIME) - lastPrint >= 1000. ){ // If last prinf() was more than 1 sec ago
+         // printf and reset timer
+         frameTime = 1000.0/double(nbFrames);
+         nbFrames = 0;
+         lastPrint = glutGet(GLUT_ELAPSED_TIME);
+     }
+
    //Get delta time value
    t = (glutGet(GLUT_ELAPSED_TIME) - lastTime) / 1000.0;
    lastTime = glutGet(GLUT_ELAPSED_TIME);
@@ -959,6 +792,12 @@ void idle()
          causticIndex = (causticIndex + 1)%16;
          causticCounter = 0;
    }
+   //Decay the speed
+   //Speed decay inspired by: https://forums.ogre3d.org/viewtopic.php?t=18566
+   //I believe this should remain constant independent of framerate/frametime
+   velocityX *=  pow(.99, frameTime/15);
+   velocityY *=  pow(.99, frameTime/15);
+   velocityZ *=  pow(.99, frameTime/15);
    glutPostRedisplay();
 }
 
@@ -972,19 +811,19 @@ void initializeBubbles() {
 }
 
 void initializeTexturesAndModels() {
-   texture[0] = LoadTexBMP("Coral.bmp");
-   texture[1] = LoadTexBMP("BlueEye.bmp");
-   texture[2] = LoadTexBMP("Red.bmp");
-   texture[3] = LoadTexBMP("CrabShell.bmp");
-   texture[4] = LoadTexBMP("FishScales.bmp");
+   texture[0] = LoadTexBMP("coral.bmp");
+   /*texture[1] = LoadTexBMP("blueEye.bmp");
+   texture[2] = LoadTexBMP("red.bmp");
+   texture[3] = LoadTexBMP("crabShell.bmp");
+   texture[4] = LoadTexBMP("ishScales.bmp");
    texture[5] = LoadTexBMP("FishFin.bmp");
-   texture[6] = LoadTexBMP("Lips.bmp");
-   texture[7] = LoadTexBMP("MotherOfPearl.bmp");
-   texture[8] = LoadTexBMP("MoPearl.bmp");
+   texture[6] = LoadTexBMP("Lips.bmp");*/
+   texture[7] = LoadTexBMP("motherOfPearl.bmp");
+   texture[8] = LoadTexBMP("moPearl.bmp");
    texture[9] = LoadTexBMP("pearl.bmp");
    texture[10] = LoadTexBMP("bubble.bmp");
-   texture[11] = LoadTexBMP("seaweed.bmp");
-   texture[12] = LoadTexBMP("CoralTube.bmp");
+   texture[11] = LoadTexBMP("seaweed2.bmp");
+   texture[12] = LoadTexBMP("coralTube.bmp");
 
    caustics[0] = LoadTexBMP("caustics_001.bmp");
    caustics[1] = LoadTexBMP("caustics_002.bmp");

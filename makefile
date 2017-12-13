@@ -32,8 +32,6 @@ project.o: project.cpp CSCIx229.h
 errcheck.o: errcheck.cpp CSCIx229.h
 object.o: object.cpp CSCIx229.h
 BasicShapes.o: BasicShapes.cpp BasicShapes.h
-FishRender.o: FishRender.cpp FishRender.h
-CrabRender.o: CrabRender.cpp CrabRender.h
 
 
 
@@ -41,10 +39,6 @@ CrabRender.o: CrabRender.cpp CrabRender.h
 CSCIx229.a:fatal.o loadtexbmp.o print.o project.o errcheck.o object.o
 	ar -rcs $@ $^
 BasicShapes.a:BasicShapes.o
-	ar -rcs $@ $^
-FishRender.a:FishRender.o
-	ar -rcs $@ $^
-CrabRender.a:CrabRender.o
 	ar -rcs $@ $^
 
 # Compile rules
@@ -54,7 +48,7 @@ CrabRender.a:CrabRender.o
 	g++ -c $(CFLG) $<
 
 #  Link
-FinalProject:FinalProject.o CSCIx229.a BasicShapes.a FishRender.a CrabRender.a
+FinalProject:FinalProject.o CSCIx229.a BasicShapes.a
 	g++ -O3 -o $@ $^   $(LIBS)
 
 #  Clean
